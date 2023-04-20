@@ -1,9 +1,11 @@
 package window;
 
 import aplication.LoginListner;
-
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
 
 public class LoginWindow extends JFrame {
     private JLabel userLabel,passLabel;
@@ -39,6 +41,8 @@ public class LoginWindow extends JFrame {
         accept.setLocation(20,80);
         accept.addActionListener(this::acceptAction);
         add(accept);
+
+        this.listner = listner;
     }
 
     public void acceptAction(ActionEvent e){
