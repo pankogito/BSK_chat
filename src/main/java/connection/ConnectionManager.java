@@ -11,7 +11,6 @@ public class ConnectionManager implements ConnectionListner{
     public ConnectionManager() {
         connections = new LinkedList<>();
     }
-
     @Override
     public void recordOpen(Socket socket) {
         connections.add(new Connection(socket));
