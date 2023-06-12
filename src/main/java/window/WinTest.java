@@ -20,7 +20,7 @@ public class WinTest {
 
         try {
             var con = new ConnectionManager();
-            var net  = new NetworkManager(5555,con);
+            var net  = new NetworkManager(-1,con);
             var win = new MainFrame(net,con);
             win.setVisible(true);
             win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
