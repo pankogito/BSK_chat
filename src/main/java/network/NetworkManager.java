@@ -23,10 +23,20 @@ public class NetworkManager {
 
     public NetworkManager(int port,ConnectionListner listner) throws IOException {
         this.listner = listner;
-        server = new ServerSocket(port);
         map = new HashMap<>();
-        acceptHandlingThread = new Thread(this::acceptHandling);
-        acceptHandlingThread.start();
+
+        startServer(port);
+
+    }
+    public void startServer(int port) throws IOException {
+        if(acceptHandlingThread != null){
+            acceptHandlingThread.interrupt();
+        }
+        if(port > 0){
+            acceptHandlingThread = new Thread(this::acceptHandling);
+            server = new ServerSocket(port);
+            acceptHandlingThread.start();
+        }
     }
 
     public synchronized void putSocket(InetAddressAndPort address,Socket socket){
@@ -59,8 +69,6 @@ public class NetworkManager {
             map.remove(address);
         }
     }
-
-
 
     public void acceptHandling(){
         while(true){
