@@ -108,6 +108,7 @@ public class MainFrame extends JFrame {
             con.logListner = null;
         con = connection;
         con.logListner = this::logUpdate;
+        con.conListner = this::userConfirm;
     }
     public void listenAction(ActionEvent e){
         try {
@@ -161,13 +162,20 @@ public class MainFrame extends JFrame {
         con.setCipherSetting(cbc.isSelected());
     }
     public void logUpdate(){
-        textArea.setText(con.getLogs());
+        StringBuilder string = new StringBuilder(con.getLogs() + "\n--------------------------------------------------------\n");
+        for( var s: con.getTransferLogs().values()){
+            string.append(s).append("\n");
+        }
+        textArea.setText(string.toString());
     }
     public void userUpdate() {
         userList.removeAllItems();
         for(var con: connectionManager.getConnections()){
             userList.addItem(con.name);
         }
+    }
+    public boolean userConfirm(String question){
+        return JOptionPane.showConfirmDialog(this,question)==JOptionPane.OK_OPTION;
     }
 
 }
