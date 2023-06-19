@@ -47,7 +47,9 @@ public class CipherReceive implements CipherNegotiation{
                 else
                     connection.addTransferLog(RECEIVE_LOG+received.getId(),100.0*received.getCounter()/received.getLength());
 
-            } catch (IOException e) {e.printStackTrace();}
+            } catch (IOException e) {e.printStackTrace();} catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
         else if(prefix.equals(Connection.ACCEPT_CIPHER_PRE)){
             connection.addLog("CONNECTION IS SAFE");
