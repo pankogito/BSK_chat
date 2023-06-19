@@ -16,6 +16,11 @@ public class SymmetricCipher {
 
     private SecretKey key;
     private SecureRandom random;
+
+    public boolean isCbc() {
+        return cbc;
+    }
+
     private boolean cbc;
 
     public SecretKey getKey() {
