@@ -38,7 +38,7 @@ public class FileSend implements  FileTransferProcedure{
     public void sendTransferThread(){
         while(fileTransfer.getCounter() < fileTransfer.getLength()){
             try {
-                connection.send(FILE_PRE,fileTransfer.readBytes(FRAME_SIZE-2));
+                connection.send(FILE_PRE,fileTransfer.readBytes(connection.dataSize()-2));
                 connection.addTransferLog(SEND_LOG+ fileTransfer.getId(), 100.0*fileTransfer.getCounter()/fileTransfer.getLength());
             } catch (IOException e) {
                 e.printStackTrace();

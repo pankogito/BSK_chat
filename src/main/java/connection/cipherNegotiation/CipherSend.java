@@ -58,7 +58,7 @@ public class CipherSend implements  CipherNegotiation{
     public void sendTransferThread(){
         while(sended.getCounter() < sended.getLength()){
             try {
-                connection.send(Connection.CIPHER_PRE,sended.readBytes(Connection.FRAME_SIZE-2));
+                connection.send(Connection.CIPHER_PRE,sended.readBytes(connection.dataSize()-2));
                 connection.addTransferLog(SEND_LOG+ sended.getId(), 100.0*sended.getCounter()/sended.getLength());
             } catch (IOException e) {e.printStackTrace();}
         }

@@ -190,7 +190,12 @@ public class Connection {
             e.printStackTrace();
         }
     }
-
+    public int dataSize(){
+        if(current==null ||!current.isCbc())
+            return FRAME_SIZE;
+        else
+            return FRAME_SIZE-SymmetricCipher.IV_SIZE;
+    }
 
     public synchronized void defaultReceive(byte[] bytes){
         String prefix = receivePrefix(bytes);
