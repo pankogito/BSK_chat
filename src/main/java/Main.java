@@ -6,7 +6,6 @@ import window.MainFrame;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.util.List;
 
 public class Main {
 

@@ -2,8 +2,7 @@ package cipher;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.ByteBuffer;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -11,7 +10,9 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Arrays;
+
 
 public class AsymmetricCipher {
     private PublicKey publicKey;
@@ -38,8 +39,18 @@ public class AsymmetricCipher {
     public byte[] encrypt(byte[] bytes) throws Exception {
         Cipher cipher = Cipher.getInstance(algorithm);
         cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-        return cipher.doFinal(bytes);
+        int encryptedBytesSize = (int) (256 * Math.ceil(bytes.length/245.0));
+        byte[] encryptedBytes = new byte[encryptedBytesSize];
+        ByteBuffer buffer = ByteBuffer.wrap(encryptedBytes);
 
+        for (int i = 0; i < bytes.length; i += 245) {
+            byte[] tile = new byte[Math.min(245, bytes.length - i)];
+            System.arraycopy(bytes, i, tile, 0, tile.length);
+            byte[] encrypted = cipher.doFinal(tile);
+            buffer.put(encrypted);
+        }
+
+        return buffer.array();
     }
 
     public byte[] decrypt(byte[] bytes) throws Exception {
@@ -48,8 +59,18 @@ public class AsymmetricCipher {
         else {
             Cipher cipher = Cipher.getInstance(algorithm);
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
+            int decryptedBytesSize = (int) (bytes.length - ((Math.ceil((double) bytes.length /256) * 11)));
+            byte[] decryptedBytes = new byte[decryptedBytesSize];
+            ByteBuffer buffer = ByteBuffer.wrap(decryptedBytes);
 
-            return cipher.doFinal(bytes);
+            for (int i = 0; i < bytes.length; i += 256) {
+                byte[] tile = new byte[Math.min(256, bytes.length - i)];
+                System.arraycopy(bytes, i, tile, 0, tile.length);
+                byte[] decrypted = cipher.doFinal(tile);
+                buffer.put(decrypted);
+            }
+
+            return buffer.array();
         }
 
     }

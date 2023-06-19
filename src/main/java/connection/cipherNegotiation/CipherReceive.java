@@ -40,6 +40,7 @@ public class CipherReceive implements CipherNegotiation{
 
                     var message = owner.decrypt(received.getBytes());
                     System.out.println(Arrays.toString(received.getBytes()));
+                    System.out.println(Arrays.toString(message));
                     var cipher = new SymmetricCipher(message,clients);
                     System.out.println(cipher);
                     connection.setCurrent(cipher);
