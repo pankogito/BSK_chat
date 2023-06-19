@@ -13,6 +13,8 @@ import java.awt.event.ActionEvent;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
 public class MainFrame extends JFrame {
 
@@ -145,12 +147,11 @@ public class MainFrame extends JFrame {
         if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION){
             try {
                 var reader = new FileInputStream(chooser.getSelectedFile());
-                var publicKey = reader.readNBytes(reader.available());
                 var assumption = new AsymmetricCipher(reader.readAllBytes());
                 var inet = new InetAddressAndPort(InetAddress.getByName(addressString),port);
                 networkManager.openSocket(inet,assumption);
 
-            } catch (IOException ex) {
+            } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException ex) {
                 ex.printStackTrace();
             }
         }

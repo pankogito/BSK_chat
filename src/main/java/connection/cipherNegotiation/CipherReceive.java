@@ -8,6 +8,7 @@ import transfer.InMemoTransfer;
 import transfer.MultiFrameTransfer;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import static connection.Connection.RECEIVE_LOG;
@@ -38,6 +39,7 @@ public class CipherReceive implements CipherNegotiation{
                     connection.removeTransferLog(RECEIVE_LOG + received.getId());
 
                     var message = owner.decrypt(received.getBytes());
+                    System.out.println(Arrays.toString(received.getBytes()));
                     var cipher = new SymmetricCipher(message,clients);
                     System.out.println(cipher);
                     connection.setCurrent(cipher);

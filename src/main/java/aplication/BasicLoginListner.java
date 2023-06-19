@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.*;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -43,7 +44,7 @@ public class BasicLoginListner implements LoginListner{
                     Files.list(trustedPath).forEach(path->{
                         try {
                             trusted.add(new AsymmetricCipher(Files.readAllBytes(path)));
-                        } catch (IOException e) {
+                        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
                             e.printStackTrace();
                         }
                     });
@@ -89,7 +90,7 @@ public class BasicLoginListner implements LoginListner{
                     JOptionPane.showMessageDialog(null, "New user created.", title, JOptionPane.INFORMATION_MESSAGE);
             }
         }
-        catch (IOException | NoSuchAlgorithmException e) {
+        catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
     }

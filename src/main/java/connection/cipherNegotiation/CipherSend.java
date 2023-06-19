@@ -22,10 +22,20 @@ public class CipherSend implements  CipherNegotiation{
     public CipherSend( Connection connection,boolean cbc, AsymmetricCipher owner,AsymmetricCipher client) {
         this.connection = connection;
         cipher = new SymmetricCipher(cbc);
+
         var bytes = cipher.getMessage(owner);
-        this.sended = new InMemoTransfer("cipher",bytes);
-        thread = new Thread(this::sendTransferThread);
-        thread.start();
+        System.out.println(Arrays.toString(bytes));
+        try {
+            bytes = client.encrypt(bytes);
+            System.out.println(Arrays.toString(bytes));
+            this.sended = new InMemoTransfer("cipher",bytes);
+
+            thread = new Thread(this::sendTransferThread);
+            thread.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override

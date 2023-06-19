@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SymmetricCipher {
-    public static int MESSAGE_SIZE = 400096;
+    public static int MESSAGE_SIZE = 4096;
 
     public byte[] getKey() {
         return key;

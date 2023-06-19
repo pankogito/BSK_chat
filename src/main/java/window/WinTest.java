@@ -9,6 +9,8 @@ import aplication.BasicLoginListner;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.LinkedList;
 
 public class WinTest {
@@ -25,7 +27,7 @@ public class WinTest {
             var win = new MainFrame(net,con);
             win.setVisible(true);
             win.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        } catch (IOException e) {
+        } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
 
