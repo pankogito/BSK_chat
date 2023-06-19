@@ -27,26 +27,29 @@ public class SymmetricCipher {
 
     public SymmetricCipher(boolean cbc) throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(128);
+        keyGenerator.init(KEY_SIZE);
         key = keyGenerator.generateKey();
         this.cbc = cbc;
         random  = new SecureRandom();
+        System.out.println(cbc + " " + Arrays.toString(key.getEncoded()));
     }
     private SymmetricCipher(byte[] message){
         cbc = message[0] == CBC;
-        key = new SecretKeySpec(Arrays.copyOfRange(message,1,KEY_SIZE+1),"AES");
-
+        key = new SecretKeySpec(Arrays.copyOfRange(message,1,KEY_SIZE/8+1),"AES");
+        random = new SecureRandom();
     }
-    public SymmetricCipher(byte[] message, List<AsymmetricCipher> potentiallySigners) throws IllegalArgumentException{
+    public SymmetricCipher(byte[] message, List<AsymmetricCipher> potentiallySigners) throws IllegalArgumentException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         this(message);
-        var sign = Arrays.copyOfRange(message,KEY_SIZE+1,KEY_SIZE+256+1);
+        System.out.println(cbc + " " + Arrays.toString(key.getEncoded()));
+        var sign = Arrays.copyOfRange(message,KEY_SIZE/8+1,KEY_SIZE/8+256+1);
         for(var signer:potentiallySigners){
-            if(signer.verifySing(sign,key.getEncoded()))
+            System.out.println(signer);
+            if(signer.verifySing(sign, key.getEncoded()))
                 return;
         }
         throw new IllegalArgumentException("untrusted sign");
     }
-    public byte[] getMessage(AsymmetricCipher signer){
+    public byte[] getMessage(AsymmetricCipher signer) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         var message = new byte[MESSAGE_SIZE];
         if(cbc)
             message[0] = CBC;

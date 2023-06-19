@@ -3,6 +3,9 @@ package connection;
 import cipher.AsymmetricCipher;
 
 import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -19,7 +22,7 @@ public class ConnectionManager implements ConnectionListner{
         this.users = users;
     }
     @Override
-    public void recordOpen(Socket socket, AsymmetricCipher assumption) {
+    public void recordOpen(Socket socket, AsymmetricCipher assumption) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         if (assumption == null)
             recordOpen(socket);
         else{

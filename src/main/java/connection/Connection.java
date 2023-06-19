@@ -15,6 +15,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +76,7 @@ public class Connection {
         receiveThread.start();
 
     }
-    public Connection(Socket socket,AsymmetricCipher owner,AsymmetricCipher client) {
+    public Connection(Socket socket,AsymmetricCipher owner,AsymmetricCipher client) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         this(socket,owner);
         this.client = client;
         boolean cbc = JOptionPane.
@@ -182,6 +185,7 @@ public class Connection {
             if(current != null)
                 message = current.encrypt(message);
             socket.getOutputStream().write(message);
+            System.out.println(message.length);
         } catch (IOException e) {
             e.printStackTrace();
         }

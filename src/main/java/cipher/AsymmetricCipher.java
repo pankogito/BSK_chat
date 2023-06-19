@@ -3,10 +3,7 @@ package cipher;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -72,21 +69,23 @@ public class AsymmetricCipher {
 
             return buffer.array();
         }
-
     }
 
-    public byte[] sign(byte[] bytes) {
+    public byte[] sign(byte[] bytes) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
         if (privateKey == null)
             return null;
-        return bytes;
+
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initSign(privateKey);
+        signature.update(bytes);
+        return signature.sign();
     }
 
-    public byte[] signed(byte[] sign) {
-        return sign;
-    }
-
-    public boolean verifySing(byte[] sign, byte[] hash) {
-        return Arrays.equals(signed(sign), hash);
+    public boolean verifySing(byte[] sign, byte[] hash) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        Signature signature = Signature.getInstance("SHA256withRSA");
+        signature.initVerify(publicKey);
+        signature.update(hash);
+        return signature.verify(sign);
     }
 
 }

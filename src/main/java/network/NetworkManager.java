@@ -5,6 +5,9 @@ import connection.ConnectionListner;
 
 import java.io.IOException;
 import java.net.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +43,7 @@ public class NetworkManager {
         }
     }
 
-    public synchronized void putSocket(InetAddressAndPort address,Socket socket,AsymmetricCipher assumption){
+    public synchronized void putSocket(InetAddressAndPort address,Socket socket,AsymmetricCipher assumption) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         if(! map.containsKey(address) || map.get(address).isClosed()){
 
             try {
@@ -59,7 +62,7 @@ public class NetworkManager {
         }
 
     }
-    public synchronized void openSocket(InetAddressAndPort address, AsymmetricCipher assumption) throws IOException{
+    public synchronized void openSocket(InetAddressAndPort address, AsymmetricCipher assumption) throws IOException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
         var socket = new Socket(address.inetAddress,address.port);
         putSocket(address,socket,assumption);
     }
@@ -70,7 +73,7 @@ public class NetworkManager {
         }
     }
 
-    public void acceptHandling(){
+    public void acceptHandling() throws RuntimeException {
         while(true){
             try {
                 var socket = server.accept();
@@ -81,6 +84,8 @@ public class NetworkManager {
 
             } catch (IOException e) {
                 e.printStackTrace();
+            } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+                throw new RuntimeException(e);
             }
         }
     }

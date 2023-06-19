@@ -13,7 +13,9 @@ import java.awt.event.ActionEvent;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 
 public class MainFrame extends JFrame {
@@ -153,6 +155,8 @@ public class MainFrame extends JFrame {
 
             } catch (IOException | InvalidKeySpecException | NoSuchAlgorithmException ex) {
                 ex.printStackTrace();
+            } catch (SignatureException | InvalidKeyException ex) {
+                throw new RuntimeException(ex);
             }
         }
 
