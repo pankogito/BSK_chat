@@ -1,14 +1,15 @@
 package window;
 
+import cipher.AsymmetricCipher;
 import connection.ConnectionManager;
 import network.NetworkManager;
 
 import aplication.BasicLoginListner;
-import aplication.LoginListner;
 
 
 import javax.swing.*;
 import java.io.IOException;
+import java.util.LinkedList;
 
 public class WinTest {
 
@@ -19,7 +20,7 @@ public class WinTest {
         log.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         try {
-            var con = new ConnectionManager();
+            var con = new ConnectionManager(new AsymmetricCipher(new byte[0],new byte[0]),new LinkedList<>());
             var net  = new NetworkManager(-1,con);
             var win = new MainFrame(net,con);
             win.setVisible(true);

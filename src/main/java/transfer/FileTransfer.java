@@ -1,31 +1,23 @@
-package connection;
+package transfer;
 
 import java.io.*;
 import java.util.Arrays;
 
-public class FileTransfer {
-    String id;
-    long length,counter;
+public class FileTransfer extends MultiFrameTransfer{
     File file;
     OutputStream write;
     InputStream read;
-    byte[] hash;
+
 
     public FileTransfer(File f) throws FileNotFoundException {
+        super(f.getName() + " " +f.length() +"B",f.length());
         read = new FileInputStream(f);
         file = f;
-        length = file.length();
-        counter = 0;
-        id = file.getName() + " " +length +"B";
-
-        //TODO HASH
     }
     public FileTransfer(String id,File f) throws FileNotFoundException{
-        this.id = id;
-        length = Long.parseLong(id.substring(id.lastIndexOf(' ')+1,id.lastIndexOf('B')));
+        super(id,Long.parseLong(id.substring(id.lastIndexOf(' ')+1,id.lastIndexOf('B'))));
         write = new FileOutputStream(f);
         file = f;
-        counter = 0;
     }
     public byte[] readBytes(int i) throws IOException,NullPointerException {
         if(read.available() < i)
@@ -42,13 +34,9 @@ public class FileTransfer {
         counter += b.length;
     }
     public void close() throws IOException {
+        if(write != null)
+            write.close();
         if(read != null)
             read.close();
-        else
-            write.close();
     }
-    public boolean ended(){
-        return counter == length;
-    }
-
 }
