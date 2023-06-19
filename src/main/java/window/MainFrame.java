@@ -1,16 +1,18 @@
 package window;
 
+import cipher.AsymmetricCipher;
 import connection.Connection;
 import connection.ConnectionManager;
+import connection.ConnectionState;
 import network.InetAddressAndPort;
 import network.NetworkManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 public class MainFrame extends JFrame {
 
@@ -104,10 +106,17 @@ public class MainFrame extends JFrame {
 
     }
     public void setCurrentConnection(Connection connection){
-        if(con != null)
+        if(con != null){
             con.logListner = null;
+            con.stateListner = null;
+        }
+
         con = connection;
         con.logListner = this::logUpdate;
+        con.conListner = this::userConfirm;
+        con.stateListner = this::stateUpdate;
+        logUpdate();
+        stateUpdate();
     }
     public void listenAction(ActionEvent e){
         try {
@@ -132,12 +141,20 @@ public class MainFrame extends JFrame {
             port = Integer.parseInt(addressString.substring(pose+1));
             addressString = addressString.substring(0,pose);
         }
-        try {
-            var inet = new InetAddressAndPort(InetAddress.getByName(addressString),port);
-            networkManager.openSocket(inet);
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        var chooser = new JFileChooser(".");
+        if(chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION){
+            try {
+                var reader = new FileInputStream(chooser.getSelectedFile());
+                var publicKey = reader.readNBytes(reader.available());
+                var assumption = new AsymmetricCipher(reader.readAllBytes());
+                var inet = new InetAddressAndPort(InetAddress.getByName(addressString),port);
+                networkManager.openSocket(inet,assumption);
+
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
+
     }
     public void disconnectAction(ActionEvent e){
 
@@ -161,13 +178,41 @@ public class MainFrame extends JFrame {
         con.setCipherSetting(cbc.isSelected());
     }
     public void logUpdate(){
-        textArea.setText(con.getLogs());
+        StringBuilder string = new StringBuilder(con.getLogs() + "\n--------------------------------------------------------\n");
+        for( var s: con.getTransferLogs().values()){
+            string.append(s).append("\n");
+        }
+        textArea.setText(string.toString());
+    }
+    public void stateUpdate(){
+        var state = con.getState();
+        System.out.println(state);
+        if(state == ConnectionState.UNSAFE
+                || state == ConnectionState.CIPHER_NEGOTIATION){
+            send.setEnabled(false);
+            sendFile.setEnabled(false);
+            cbc.setRequestFocusEnabled(true);
+        }
+        else if(state == ConnectionState.IDLE){
+            send.setEnabled(true);
+            sendFile.setEnabled(true);
+            cbc.setRequestFocusEnabled(true);
+        }
+        else if(state == ConnectionState.FILE_TRANSFER){
+            send.setEnabled(true);
+            sendFile.setEnabled(false);
+            cbc.setRequestFocusEnabled(false);
+        }
+
     }
     public void userUpdate() {
         userList.removeAllItems();
         for(var con: connectionManager.getConnections()){
             userList.addItem(con.name);
         }
+    }
+    public boolean userConfirm(String question){
+        return JOptionPane.showConfirmDialog(this,question)==JOptionPane.OK_OPTION;
     }
 
 }

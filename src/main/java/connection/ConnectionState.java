@@ -1,5 +1,8 @@
 package connection;
 
 public enum ConnectionState {
-    TO_REPLACE
+    UNSAFE,
+    IDLE,
+    CIPHER_NEGOTIATION,
+    FILE_TRANSFER,
 }

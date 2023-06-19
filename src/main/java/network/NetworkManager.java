@@ -1,5 +1,6 @@
 package network;
 
+import cipher.AsymmetricCipher;
 import connection.ConnectionListner;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class NetworkManager {
         }
     }
 
-    public synchronized void putSocket(InetAddressAndPort address,Socket socket){
+    public synchronized void putSocket(InetAddressAndPort address,Socket socket,AsymmetricCipher assumption){
         if(! map.containsKey(address) || map.get(address).isClosed()){
 
             try {
@@ -50,7 +51,7 @@ public class NetworkManager {
 
             map.put(address,socket);
             if(listner != null)
-                listner.recordOpen(socket);
+                listner.recordOpen(socket,assumption);
             System.out.println("Socket Open "+address);
         }
         else{
@@ -58,10 +59,9 @@ public class NetworkManager {
         }
 
     }
-
-    public synchronized void openSocket(InetAddressAndPort address) throws IOException{
+    public synchronized void openSocket(InetAddressAndPort address, AsymmetricCipher assumption) throws IOException{
         var socket = new Socket(address.inetAddress,address.port);
-        putSocket(address,socket);
+        putSocket(address,socket,assumption);
     }
     public synchronized void closeSocket(InetAddressAndPort address) throws IOException{
         if(map.containsKey(address)){
@@ -77,7 +77,7 @@ public class NetworkManager {
                 var address = new InetAddressAndPort(socket.getInetAddress(),socket.getPort());
 
 
-                putSocket(address,socket);
+                putSocket(address,socket,null);
 
             } catch (IOException e) {
                 e.printStackTrace();

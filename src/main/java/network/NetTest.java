@@ -1,12 +1,13 @@
 package network;
 
+import cipher.AsymmetricCipher;
 import connection.ConnectionManager;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 public class NetTest {
@@ -16,7 +17,7 @@ public class NetTest {
         try {
             Scanner in = new Scanner(System.in);
             System.out.print("Open Service on Port: ");
-            var cons = new ConnectionManager();
+            var cons = new ConnectionManager(new AsymmetricCipher(new byte[0],new byte[0]),new LinkedList<>());
             var net = new NetworkManager(Integer.parseInt(in.nextLine()),cons);
             System.out.println("Service Open");
             System.out.print("Connect? [Y/N] ");
@@ -27,7 +28,6 @@ public class NetTest {
                         InetAddress.getByName("localhost"),
                         port
                 );
-                net.openSocket(inetAndPort);
             }
 
 
