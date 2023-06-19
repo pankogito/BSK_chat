@@ -175,7 +175,7 @@ public class Connection {
     }
     public synchronized void send(String prefix,byte[] content_bytes){
         byte[] prefix_bytes = prefix.getBytes(StandardCharsets.UTF_8);
-        byte[] message = Arrays.copyOf(prefix_bytes,FRAME_SIZE);
+        byte[] message = Arrays.copyOf(prefix_bytes,dataSize());
         int i = prefix_bytes.length;
         for(var b: content_bytes){
             message[i] = b;

@@ -77,19 +77,22 @@ public class SymmetricCipher {
         Cipher decryptionCipher = null;
         try {
             if(cbc){
-                var cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                var cipher = Cipher.getInstance("AES/CBC/NoPadding");
                 var iv = new byte[IV_SIZE];
                 random.nextBytes(iv);
                 System.out.println("iv"+ Arrays.toString(iv));
                 cipher.init(Cipher.ENCRYPT_MODE, key,new IvParameterSpec(iv));
+                System.out.println("SC 85: "+bytes.length);
                 bytes = cipher.doFinal(bytes);
+                System.out.println("SC 87: "+bytes.length);
                 var re = Arrays.copyOf(iv,iv.length+bytes.length);
                 for( int i = 0;i<bytes.length;i++)
                     re[iv.length + i] = bytes[i];
+                System.out.println("SC 91: "+re.length);
                 return re;
             }
             else{
-                var cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+                var cipher = Cipher.getInstance("AES/ECB/NoPadding");
                 cipher.init(Cipher.ENCRYPT_MODE, key);
                 return cipher.doFinal(bytes);
             }
@@ -105,14 +108,14 @@ public class SymmetricCipher {
         Cipher cipher = null;
         try {
             if(cbc){
-                cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                cipher = Cipher.getInstance("AES/CBC/NoPadding");
 
                 var iv = Arrays.copyOf(bytes, IV_SIZE);
                 bytes = Arrays.copyOfRange(bytes,IV_SIZE,bytes.length);
                 cipher.init(Cipher.DECRYPT_MODE, key,new IvParameterSpec(iv));
                 bytes = cipher.doFinal(bytes);
             }else{
-                cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+                cipher = Cipher.getInstance("AES/ECB/NoPadding");
                 cipher.init(Cipher.DECRYPT_MODE, key);
                 bytes = cipher.doFinal(bytes);
             }
