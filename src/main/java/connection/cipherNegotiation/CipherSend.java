@@ -7,6 +7,7 @@ import connection.ConnectionState;
 import transfer.InMemoTransfer;
 
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import static connection.Connection.ACCEPT_CIPHER_PRE;
@@ -21,7 +22,11 @@ public class CipherSend implements  CipherNegotiation{
 
     public CipherSend( Connection connection,boolean cbc, AsymmetricCipher owner,AsymmetricCipher client) {
         this.connection = connection;
-        cipher = new SymmetricCipher(cbc);
+        try {
+            cipher = new SymmetricCipher(cbc);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
 
         var bytes = cipher.getMessage(owner);
         System.out.println(Arrays.toString(bytes));

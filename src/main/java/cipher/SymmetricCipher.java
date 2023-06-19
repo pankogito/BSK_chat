@@ -1,75 +1,126 @@
 package cipher;
 
+import javax.crypto.*;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.*;
 import java.util.Arrays;
 import java.util.List;
 
 public class SymmetricCipher {
-    public static int MESSAGE_SIZE = 4096;
+    public static int MESSAGE_SIZE = 512;
+    public static int KEY_SIZE = 128;
+    public static int IV_SIZE = 16;
+    private static byte CBC = 1;
 
-    public byte[] getKey() {
+    private SecretKey key;
+    private SecureRandom random;
+    private boolean cbc;
+
+    public SecretKey getKey() {
         return key;
     }
-
-    public byte[] getEncryptIv() {
-        return encryptIv;
+    public byte[] getHash(){
+        return key.getEncoded();
     }
 
-    public byte[] getDecryptIv() {
-        return decryptIv;
+    public SymmetricCipher(boolean cbc) throws NoSuchAlgorithmException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(128);
+        key = keyGenerator.generateKey();
+        this.cbc = cbc;
+        random  = new SecureRandom();
     }
+    private SymmetricCipher(byte[] message){
+        cbc = message[0] == CBC;
+        key = new SecretKeySpec(Arrays.copyOfRange(message,1,KEY_SIZE+1),"AES");
 
-    public byte[] getHash() {
-        return hash;
     }
-
-    private byte[] key,encryptIv,decryptIv,hash;
-
-    public SymmetricCipher(boolean cbc){
-        hash = new byte[256];
-        hash[ 0] = 127;
-        hash[255] = 125;
-        //TODO Random generation of key and iv if cbc == true, next make hash
+    public SymmetricCipher(byte[] message, List<AsymmetricCipher> potentiallySigners) throws IllegalArgumentException{
+        this(message);
+        var sign = Arrays.copyOfRange(message,KEY_SIZE+1,KEY_SIZE+256+1);
+        for(var signer:potentiallySigners){
+            if(signer.verifySing(sign,key.getEncoded()))
+                return;
+        }
+        throw new IllegalArgumentException("untrusted sign");
     }
-
     public byte[] getMessage(AsymmetricCipher signer){
-        var message = Arrays.copyOf(hash,MESSAGE_SIZE);
-        //TODO copy key and iv
-        System.out.println(message);
+        var message = new byte[MESSAGE_SIZE];
+        if(cbc)
+            message[0] = CBC;
+        int  i = 1;
+        for(var b : key.getEncoded()){
+            message[i] =  b;
+            i++;
+        }
+        for(var b : signer.sign(key.getEncoded())){
+            message[i] =  b;
+            i++;
+        }
         return message;
     }
 
-    public SymmetricCipher(byte[] message,AsymmetricCipher signer){
-        hash = signer.signed(Arrays.copyOfRange(message,0,256));
-        this.encryptIv = new byte[0];
-        this.decryptIv = new byte[0];
-        this.key = new byte[0];
-        //TODO get key and iv from message. Verify sing.
-    }
-    public SymmetricCipher(byte[] message, List<AsymmetricCipher> potentiallySigners){
-        hash = Arrays.copyOfRange(message,0,256);
-        this.encryptIv = new byte[0];
-        this.decryptIv = new byte[0];
-        this.key = new byte[0];
-        //TODO get key and iv from message. Verify sing.
-    }
 
-    public SymmetricCipher(byte[] key,byte[] iv,byte[] hash){
-        this.encryptIv = iv;
-        this.decryptIv = iv;
-        this.key = key;
-        this.hash = hash;
-    }
+
+
     public byte[] encrypt(byte[] bytes){
-        return bytes;
+        Cipher decryptionCipher = null;
+        try {
+            if(cbc){
+                var cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                var iv = new byte[IV_SIZE];
+                random.nextBytes(iv);
+                System.out.println("iv"+ Arrays.toString(iv));
+                cipher.init(Cipher.ENCRYPT_MODE, key,new IvParameterSpec(iv));
+                bytes = cipher.doFinal(bytes);
+                var re = Arrays.copyOf(iv,iv.length+bytes.length);
+                for( int i = 0;i<bytes.length;i++)
+                    re[iv.length + i] = bytes[i];
+                return re;
+            }
+            else{
+                var cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+                cipher.init(Cipher.ENCRYPT_MODE, key);
+                return cipher.doFinal(bytes);
+            }
+
+
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     public byte[] decrypt(byte[] bytes){
-        return bytes;
+
+        Cipher cipher = null;
+        try {
+            if(cbc){
+                cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+
+                var iv = Arrays.copyOf(bytes, IV_SIZE);
+                bytes = Arrays.copyOfRange(bytes,IV_SIZE,bytes.length);
+                cipher.init(Cipher.DECRYPT_MODE, key,new IvParameterSpec(iv));
+                bytes = cipher.doFinal(bytes);
+            }else{
+                cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+                cipher.init(Cipher.DECRYPT_MODE, key);
+                bytes = cipher.doFinal(bytes);
+            }
+            return bytes;
+
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     public boolean validateHash(byte[] hash){
-        if(hash.length > this.hash.length){
-            hash = Arrays.copyOfRange(hash,0,this.hash.length);
+        var h = key.getEncoded();
+        if(hash.length > h.length){
+            hash = Arrays.copyOfRange(hash,0,h.length);
         }
-        return Arrays.equals(this.hash,hash);
+        return Arrays.equals(h,hash);
     }
 }
 
